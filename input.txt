@@ -1,0 +1,2 @@
+Here is my input.txt file
+Cool beans
