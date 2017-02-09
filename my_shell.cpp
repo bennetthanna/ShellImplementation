@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    while(getline(&line, &n, stdin) != -1) {
+    while(getline(&line, &n, stdin)) {
         
         if (strcmp(line, "exit\n") == 0) {
             exit(0);
@@ -57,80 +58,59 @@ int main(int argc, char *argv[])
                 }
         }
         
-        if (fileRedirection == true) {
-            for (int i = 0; i < commandArguments.size(); ++i) {
-                if (strcmp(commandArguments[i], "<") == 0) {
-                    switch(fork()) {
-                        case -1:
-                            perror("Bad Fork\n");
-                            exit(1);
-                        case 0:
+        switch(fork()) {
+            case -1:
+                perror("Bad Fork");
+                exit(1);
+            case 0:
+                
+                if (fileRedirection == true) {
+                    for (int i = 0; i < commandArguments.size(); ++i) {
+                        if (strcmp(commandArguments[i], "<") == 0) {
                             fileToBeDuped1 = fopen(commandArguments[i + 1], "r");
                             fileDescriptor1 = fileno(fileToBeDuped1);
                             dup2(fileDescriptor1, 0);
                             fclose(fileToBeDuped1);
-                        default:
-                            wait(&status);
-                    }
-                } else if (strcmp(commandArguments[i], ">") == 0) {
-                    switch(fork()) {
-                        case -1:
-                            perror("Bad Fork\n");
-                            exit(1);
-                        case 0:
+                        } else if (strcmp(commandArguments[i], ">") == 0) {
                             fileToBeDuped2 = fopen(commandArguments[i + 1], "w");
                             fileDescriptor2 = fileno(fileToBeDuped2);
                             dup2(fileDescriptor2, 1);
                             fclose(fileToBeDuped2);
-                        default:
-                            wait(&status);
-                    }
-                } else if (strcmp(commandArguments[i], ">>") == 0) {
-                    switch(fork()) {
-                        case -1:
-                            perror("Bad Fork\n");
-                            exit(1);
-                        case 0:
+                        } else if (strcmp(commandArguments[i], ">>") == 0) {
                             fileToBeDuped2 = fopen(commandArguments[i + 1], "w");
                             fileDescriptor2 = fileno(fileToBeDuped2);
                             dup2(fileDescriptor2, 1);
                             fclose(fileToBeDuped2);
-                        default:
-                            wait(&status);
-                    }
-                } else if (strcmp(commandArguments[i], "2>") == 0) {
-                    switch(fork()) {
-                        case -1:
-                            perror("Bad Fork\n");
-                            exit(1);
-                        case 0:
+                        } else if (strcmp(commandArguments[i], "2>") == 0) {
                             fileToBeDuped3 = fopen(commandArguments[i + 1], "w");
                             fileDescriptor3 = fileno(fileToBeDuped3);
-                            dup2(fileDescriptor3, 3);
+                            dup2(fileDescriptor3, 2);
                             fclose(fileToBeDuped3);
-                        default:
-                            wait(&status);
+                        }
                     }
                 }
-            }
-            
-            
-            printf("Exec\n");
-            execlp(args[0], args[0], NULL);
-            
-        } else {
-            switch(fork()) {
-                case -1:
-                    perror("Bad Fork");
-                    exit(1);
-                case 0:
-                    execvp(args[0], args);
-                default:
-                    wait(&status);
-                    free(args);
-            }
+                
+                execlp(args[0], args[0], NULL);
+                perror("execlp failure");
+            default:
+                wait(&status);
+                free(args);
         }
- 
+        
+//        } else {
+//            switch(fork()) {
+//                case -1:
+//                    perror("Bad Fork");
+//                    exit(1);
+//                case 0:
+//                    execvp(args[0], args);
+//                    perror("execvp failure");
+//                default:
+//                    wait(&status);
+//                    free(args);
+//            }
+//        }
+
         //clear commandArguments vector
         commandArguments.clear();
         
