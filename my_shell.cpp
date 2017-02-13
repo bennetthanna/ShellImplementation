@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     char *line = NULL;
     char *token;
-    char **firstArg;
+    char **firstArg = NULL;
     size_t n = 0;
     int status;
     std::vector <char *> commandArguments;
@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
         //error check strtok
         if (token == NULL) {
             perror("Strtok failure");
+            exit(1);
         }
         while (token != NULL) {
             commandArguments.push_back(token);
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
                     firstArg = (char**)malloc(sizeof(char*) * (command.size() + 1));
                     if (firstArg == NULL) {
                         perror("Malloc failure\n");
+                        exit(1);
                     }
                     
                     for(int i = 0; i < command.size(); ++i) {
@@ -127,52 +129,64 @@ int main(int argc, char *argv[])
                                 fileToBeDuped1 = fopen(commandArguments[i + 1], "r");
                                 if (fileToBeDuped1 == NULL) {
                                     perror("Fopen failure");
+                                    exit(1);
                                 }
                                 fileDescriptor1 = fileno(fileToBeDuped1);
                                 if (fileDescriptor1 == -1) {
                                     perror("Fileno failure");
+                                    exit(1);
                                 }
                                 if (dup2(fileDescriptor1, 0) == -1) {
                                     perror("Dup failure");
+                                    exit(1);
                                 }
                                 fclose(fileToBeDuped1);
                             } else if (strcmp(commandArguments[i], ">") == 0) {
                                 fileToBeDuped2 = fopen(commandArguments[i + 1], "w");
                                 if (fileToBeDuped2 == NULL) {
                                     perror("Fopen failure");
+                                    exit(1);
                                 }
                                 fileDescriptor2 = fileno(fileToBeDuped2);
                                 if (fileDescriptor2 == -1) {
                                     perror("Fileno failure");
+                                    exit(1);
                                 }
                                 if (dup2(fileDescriptor2, 1) == -1) {
                                     perror("Dup failure");
+                                    exit(1);
                                 }
                                 fclose(fileToBeDuped2);
                             } else if (strcmp(commandArguments[i], ">>") == 0) {
                                 fileToBeDuped2 = fopen(commandArguments[i + 1], "a");
                                 if (fileToBeDuped2 == NULL) {
                                     perror("Fopen failure");
+                                    exit(1);
                                 }
                                 fileDescriptor2 = fileno(fileToBeDuped2);
                                 if (fileDescriptor2 == -1) {
                                     perror("Fileno failure");
+                                    exit(1);
                                 }
                                 if (dup2(fileDescriptor2, 1) == -1) {
                                     perror("Dup failure");
+                                    exit(1);
                                 }
                                 fclose(fileToBeDuped2);
                             } else if (strcmp(commandArguments[i], "2>") == 0) {
                                 fileToBeDuped3 = fopen(commandArguments[i + 1], "w");
                                 if (fileToBeDuped3 == NULL) {
                                     perror("Fopen failure");
+                                    exit(1);
                                 }
                                 fileDescriptor3 = fileno(fileToBeDuped3);
                                 if (fileDescriptor3 == -1) {
                                     perror("Fileno failure");
+                                    exit(1);
                                 }
                                 if (dup2(fileDescriptor3, 2) == -1) {
                                     perror("Dup failure");
+                                    exit(1);
                                 }
                                 fclose(fileToBeDuped3);
                             }
@@ -183,6 +197,7 @@ int main(int argc, char *argv[])
                     execvp(firstArg[0], firstArg);
                     //error check
                     perror("Execvp failure");
+                    exit(1);
                 default:
                     //parent should wait
                     //free memory
@@ -229,6 +244,11 @@ int main(int argc, char *argv[])
                 
                 //convert to char** to be able to pass to exec
                 char **whatArgs = (char**)malloc(sizeof(char*) * (noFileRedirection.size() + 1));
+                if (whatArgs == NULL) {
+                    perror("Malloc failure\n");
+                    exit(1);
+                }
+                
                 for(int i = 0; i < noFileRedirection.size(); ++i) {
                     whatArgs[i] = noFileRedirection[i];
                 }
@@ -248,52 +268,64 @@ int main(int argc, char *argv[])
                                     fileToBeDuped1 = fopen(commandArguments[i + 1], "r");
                                     if (fileToBeDuped1 == NULL) {
                                         perror("Fopen failure");
+                                        exit(1);
                                     }
                                     fileDescriptor1 = fileno(fileToBeDuped1);
                                     if (fileDescriptor1 == -1) {
                                         perror("Fileno failure");
+                                        exit(1);
                                     }
                                     if (dup2(fileDescriptor1, 0) == -1) {
                                         perror("Dup failure");
+                                        exit(1);
                                     }
                                     fclose(fileToBeDuped1);
                                 } else if (strcmp(commandArguments[i], ">") == 0) {
                                     fileToBeDuped2 = fopen(commandArguments[i + 1], "w");
                                     if (fileToBeDuped2 == NULL) {
                                         perror("Fopen failure");
+                                        exit(1);
                                     }
                                     fileDescriptor2 = fileno(fileToBeDuped2);
                                     if (fileDescriptor2 == -1) {
                                         perror("Fileno failure");
+                                        exit(1);
                                     }
                                     if (dup2(fileDescriptor2, 1) == -1) {
                                         perror("Dup failure");
+                                        exit(1);
                                     }
                                     fclose(fileToBeDuped2);
                                 } else if (strcmp(commandArguments[i], ">>") == 0) {
                                     fileToBeDuped2 = fopen(commandArguments[i + 1], "a");
                                     if (fileToBeDuped2 == NULL) {
                                         perror("Fopen failure");
+                                        exit(1);
                                     }
                                     fileDescriptor2 = fileno(fileToBeDuped2);
                                     if (fileDescriptor2 == -1) {
                                         perror("Fileno failure");
+                                        exit(1);
                                     }
                                     if (dup2(fileDescriptor2, 1) == -1) {
                                         perror("Dup failure");
+                                        exit(1);
                                     }
                                     fclose(fileToBeDuped2);
                                 } else if (strcmp(commandArguments[i], "2>") == 0) {
                                     fileToBeDuped3 = fopen(commandArguments[i + 1], "w");
                                     if (fileToBeDuped3 == NULL) {
                                         perror("Fopen failure");
+                                        exit(1);
                                     }
                                     fileDescriptor3 = fileno(fileToBeDuped3);
                                     if (fileDescriptor3 == -1) {
                                         perror("Fileno failure");
+                                        exit(1);
                                     }
                                     if (dup2(fileDescriptor3, 2) == -1) {
                                         perror("Dup failure");
+                                        exit(1);
                                     }
                                     fclose(fileToBeDuped3);
                                 }
@@ -306,74 +338,87 @@ int main(int argc, char *argv[])
                                 //close the read end
                                 if (close(FDs[j][0]) == -1) {
                                     perror("Close read end failure");
+                                    exit(1);
                                 }
                                 //if it is not the first pipe
                                 if (j != 0) {
                                     //close the write end
                                     if (close(FDs[j][1]) == -1) {
                                         perror("Close write end failure");
+                                        exit(1);
                                     }
                                 }
                             }
                             //dup the write
                             if (dup2(FDs[i][1], 1) == -1) {
                                 perror("Dup failure");
+                                exit(1);
                             }
                             //exec the arguments
                             execvp(whatArgs[0], whatArgs);
                             perror("Execvp failure");
+                            exit(1);
                         }
                         
                         //if it is one of the middle processes
                         if (i > 0 && i < numPipes) {
                             for (int j =0; j < FDs.size(); ++j) {
-                                //close the write ends except for the pipe previous
+                                //close the read ends except for the pipe previous
                                 if(j != (i - 1)) {
                                     if (close(FDs[j][0]) == -1) {
-                                        perror("Close write end failure");
+                                        perror("Close read end failure");
+                                        exit(1);
                                     }
                                 }
-                                //close read ends except for current pipe
+                                //close write ends except for current pipe
                                 if (j != i) {
                                     if (close(FDs[j][1]) == -1) {
-                                        perror("Close read end failure");
+                                        perror("Close write end failure");
+                                        exit(1);
                                     }
                                 }
                             }
                             //dup write end
                             if (dup2(FDs[i][1], 1) == -1) {
                                 perror("Dup failure");
+                                exit(1);
                             }
                             //dup read end
                             if (dup2(FDs[i-1][0], 0) == -1) {
                                 perror("Dup failure");
+                                exit(1);
                             }
                             //exec the arguments
                             execvp(whatArgs[0], whatArgs);
                             perror("Execvp failure");
+                            exit(1);
                         }
                         
                         //if it is the last process
                         if (i == processCount - 1) {
                             for (int j = 0; j < FDs.size(); ++j) {
-                                //close all write ends except for current
+                                //close all read ends except for current
                                 if (j != (i - 1)) {
                                     if (close(FDs[j][0]) == -1) {
-                                        perror("Close write end failure");
+                                        perror("Close read end failure");
+                                        exit(1);
                                     }
                                 }
-                                //close all read ends
+                                //close all write ends
                                 if (close(FDs[j][1]) == -1) {
-                                    perror("Close read end failure");
+                                    perror("Close write end failure");
+                                    exit(1);
                                 }
                             }
                             //dup read end
                             if (dup2(FDs[i-1][0], 0) == -1) {
                                 perror("Dup failure");
+                                exit(1);
                             }
                             //exec arguments
                             execvp(whatArgs[0], whatArgs);
                             perror("Execvp failure");
+                            exit(1);
                         }
                 }
                 
@@ -393,9 +438,11 @@ int main(int argc, char *argv[])
             for (int i = 0; i < numPipes; ++i) {
                 if (close(FDs[i][0]) == -1) {
                     perror("Close read end failure");
+                    exit(1);
                 }
                 if (close(FDs[i][1]) == -1) {
                     perror("Close write end failure");
+                    exit(1);
                 }
             }
             //wait for each process
